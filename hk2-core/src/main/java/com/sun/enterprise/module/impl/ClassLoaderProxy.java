@@ -24,7 +24,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.io.IOException;
-import java.lang.ref.Cleaner;
+import org.glassfish.hk2.utilities.CleanerFactory;
 
 /**
  * ClassLoaderProxy capable of loading classes from itself but also from other class loaders
@@ -200,7 +200,7 @@ public class ClassLoaderProxy extends URLClassLoader {
      * this is a good time to see if this module should be unloaded.
      */
     public final void registerStopEvent() {
-        Cleaner.create().register(this, () -> {
+        CleanerFactory.create().register(this, () -> {
             stop();
         });
     }

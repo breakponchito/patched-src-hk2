@@ -18,7 +18,7 @@
 package org.glassfish.hk2.internal;
 
 import java.lang.annotation.Annotation;
-import java.lang.ref.Cleaner;
+import org.glassfish.hk2.utilities.CleanerFactory;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.HashMap;
@@ -137,7 +137,7 @@ public class InheritableThreadContext implements Context<InheritableThread> {
         }
 
         public final void registerStopEvent() {
-            Cleaner.create().register(this, () -> {
+            CleanerFactory.create().register(this, () -> {
                 instances.clear();
 
                 if (LOG_THREAD_DESTRUCTION) {

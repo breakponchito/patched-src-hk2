@@ -21,7 +21,7 @@ import com.sun.enterprise.module.common_impl.LogHelper;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.lang.ref.Cleaner;
+import org.glassfish.hk2.utilities.CleanerFactory;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
@@ -50,7 +50,7 @@ final class ClassLoaderFacade extends URLClassLoader {
     }
 
     public final void registerStopEvent() {
-        Cleaner.create().register(this, () -> {
+        CleanerFactory.create().register(this, () -> {
             LogHelper.getDefaultLogger().log(Level.FINE, "Facade ClassLoader killed {0}", privateLoader.getOwner().getModuleDefinition().getName());
             privateLoader.stop();
         });
