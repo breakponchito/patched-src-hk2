@@ -32,7 +32,7 @@ public class FieldSignatureVisitorImpl extends SignatureVisitor {
     private final ArrayDeque<ParameterizedType> parentType = new ArrayDeque<>();
 
     public FieldSignatureVisitorImpl(TypeBuilder typeBuilder, FieldModel fieldModel) {
-        super(Opcodes.ASM7);
+        super(Opcodes.ASM9);
 
         this.typeBuilder = typeBuilder;
         parentType.add(fieldModel);

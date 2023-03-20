@@ -40,7 +40,7 @@ public class MethodSignatureVisitorImpl extends SignatureVisitor {
     private final ArrayDeque<ParameterizedType> parentType = new ArrayDeque<>();
 
     public MethodSignatureVisitorImpl(TypeBuilder typeBuilder, MethodModel methodModel) {
-        super(Opcodes.ASM7);
+        super(Opcodes.ASM9);
 
         this.typeBuilder = typeBuilder;
         this.methodModel = methodModel;
