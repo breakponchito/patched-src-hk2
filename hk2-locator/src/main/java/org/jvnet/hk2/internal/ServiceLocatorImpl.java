@@ -166,8 +166,8 @@ public class ServiceLocatorImpl implements ServiceLocator {
             new WeakHashMap<ServiceLocatorImpl, ServiceLocatorImpl>(); // Must be Weak for throw away children
 
     private final Object classAnalyzerLock = new Object();
-    private final HashMap<String, ClassAnalyzer> classAnalyzers =
-            new HashMap<String, ClassAnalyzer>();
+    private final ConcurrentHashMap<String, ClassAnalyzer> classAnalyzers =
+            new ConcurrentHashMap<String, ClassAnalyzer>();
     private String defaultClassAnalyzer = ClassAnalyzer.DEFAULT_IMPLEMENTATION_NAME;
     private volatile Unqualified defaultUnqualified = null;
 
@@ -2467,9 +2467,7 @@ public class ServiceLocatorImpl implements ServiceLocator {
         }
 
         if (retVal == null) {
-            collector.addThrowable(new IllegalStateException(
-                    "Could not find an implementation of ClassAnalyzer with name " +
-                            name));
+            collector.addThrowable(new IllegalStateException("Could not find an implementation of ClassAnalyzer with name " + name));
             return null;
         }
 
