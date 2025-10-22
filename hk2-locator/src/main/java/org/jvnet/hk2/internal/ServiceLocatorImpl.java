@@ -2421,13 +2421,15 @@ public class ServiceLocatorImpl implements ServiceLocator {
 
     @Override
     public void setDefaultClassAnalyzerName(String defaultClassAnalyzer) {
-        synchronized (classAnalyzerLock) {
+        wLock.lock();
+        try {
             if (defaultClassAnalyzer == null) {
                 this.defaultClassAnalyzer = ClassAnalyzer.DEFAULT_IMPLEMENTATION_NAME;
-            }
-            else {
+            } else {
                 this.defaultClassAnalyzer = defaultClassAnalyzer;
             }
+        } finally {
+            wLock.unlock();
         }
     }
     
@@ -2456,18 +2458,21 @@ public class ServiceLocatorImpl implements ServiceLocator {
 
     /* package */ ClassAnalyzer getAnalyzer(String name, Collector collector) {
         ClassAnalyzer retVal;
-        synchronized (classAnalyzerLock) {
+        rLock.lock();
+        try {
             if (name == null) {
-                name = defaultClassAnalyzer ;
+                name = defaultClassAnalyzer;
             }
 
             retVal = classAnalyzers.get(name);
+        } finally {
+            rLock.unlock();
         }
 
         if (retVal == null) {
             collector.addThrowable(new IllegalStateException(
                     "Could not find an implementation of ClassAnalyzer with name " +
-                    name));
+                            name));
             return null;
         }
 
