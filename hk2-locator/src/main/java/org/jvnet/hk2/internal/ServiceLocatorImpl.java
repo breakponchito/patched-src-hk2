@@ -2002,19 +2002,16 @@ public class ServiceLocatorImpl implements ServiceLocator {
     private void reupClassAnalyzers() {
         List<ServiceHandle<?>> allAnalyzers = protectedGetAllServiceHandles(ClassAnalyzer.class);
 
-        synchronized (classAnalyzerLock) {
-            classAnalyzers.clear();
+        classAnalyzers.clear();
+        for (ServiceHandle<?> handle : allAnalyzers) {
+            ActiveDescriptor<?> descriptor = handle.getActiveDescriptor();
+            String name = descriptor.getName();
+            if (name == null) continue;
 
-            for (ServiceHandle<?> handle : allAnalyzers) {
-                ActiveDescriptor<?> descriptor = handle.getActiveDescriptor();
-                String name = descriptor.getName();
-                if (name == null) continue;
+            ClassAnalyzer created = ((ServiceHandle<ClassAnalyzer>) handle).getService();
+            if (created == null) continue;
 
-                ClassAnalyzer created = ((ServiceHandle<ClassAnalyzer>) handle).getService();
-                if (created == null) continue;
-
-                classAnalyzers.put(name, created);
-            }
+            classAnalyzers.put(name, created);
         }
     }
 
@@ -2456,7 +2453,7 @@ public class ServiceLocatorImpl implements ServiceLocator {
         
     }
 
-    /* package */ ClassAnalyzer getAnalyzer(String name, Collector collector) {
+    ClassAnalyzer getAnalyzer(String name, Collector collector) {
         ClassAnalyzer retVal;
         rLock.lock();
         try {
