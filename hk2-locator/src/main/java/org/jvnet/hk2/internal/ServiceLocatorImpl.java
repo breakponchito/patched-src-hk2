@@ -2002,7 +2002,7 @@ public class ServiceLocatorImpl implements ServiceLocator {
         List<ServiceHandle<?>> allAnalyzers = protectedGetAllServiceHandles(ClassAnalyzer.class);
         wLock.lock();
         try {
-            classAnalyzers.clear();
+            //classAnalyzers.clear();
             for (ServiceHandle<?> handle : allAnalyzers) {
                 ActiveDescriptor<?> descriptor = handle.getActiveDescriptor();
                 String name = descriptor.getName();
