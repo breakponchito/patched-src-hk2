@@ -164,8 +164,7 @@ public class ServiceLocatorImpl implements ServiceLocator {
     });
     private final Map<ServiceLocatorImpl, ServiceLocatorImpl> children =
             new WeakHashMap<ServiceLocatorImpl, ServiceLocatorImpl>(); // Must be Weak for throw away children
-
-    private final Object classAnalyzerLock = new Object();
+    
     private final ConcurrentHashMap<String, ClassAnalyzer> classAnalyzers =
             new ConcurrentHashMap<String, ClassAnalyzer>();
     private String defaultClassAnalyzer = ClassAnalyzer.DEFAULT_IMPLEMENTATION_NAME;
@@ -2001,17 +2000,21 @@ public class ServiceLocatorImpl implements ServiceLocator {
     @SuppressWarnings("unchecked")
     private void reupClassAnalyzers() {
         List<ServiceHandle<?>> allAnalyzers = protectedGetAllServiceHandles(ClassAnalyzer.class);
+        wLock.lock();
+        try {
+            classAnalyzers.clear();
+            for (ServiceHandle<?> handle : allAnalyzers) {
+                ActiveDescriptor<?> descriptor = handle.getActiveDescriptor();
+                String name = descriptor.getName();
+                if (name == null) continue;
 
-        classAnalyzers.clear();
-        for (ServiceHandle<?> handle : allAnalyzers) {
-            ActiveDescriptor<?> descriptor = handle.getActiveDescriptor();
-            String name = descriptor.getName();
-            if (name == null) continue;
+                ClassAnalyzer created = ((ServiceHandle<ClassAnalyzer>) handle).getService();
+                if (created == null) continue;
 
-            ClassAnalyzer created = ((ServiceHandle<ClassAnalyzer>) handle).getService();
-            if (created == null) continue;
-
-            classAnalyzers.put(name, created);
+                classAnalyzers.put(name, created);
+            }
+        } finally {
+            wLock.unlock();
         }
     }
 
@@ -2049,6 +2052,10 @@ public class ServiceLocatorImpl implements ServiceLocator {
         // items that may have previously been cached
         reupCache(affectedContracts);
 
+        if (classAnalyzersModified) {
+            reupClassAnalyzers();
+        }
+
         if (injectionResolversModified) {
             reupInjectionResolvers();
         }
@@ -2066,10 +2073,6 @@ public class ServiceLocatorImpl implements ServiceLocator {
         }
         else {
             reupInstanceListenersHandlers(thingsAdded);
-        }
-
-        if (classAnalyzersModified) {
-            reupClassAnalyzers();
         }
         
         // Should be last in order to ensure none of the
@@ -2411,8 +2414,11 @@ public class ServiceLocatorImpl implements ServiceLocator {
 
     @Override
     public String getDefaultClassAnalyzerName() {
-        synchronized (classAnalyzerLock) {
+        rLock.lock();
+        try {
             return defaultClassAnalyzer;
+        } finally {
+            rLock.unlock();
         }
     }
 
